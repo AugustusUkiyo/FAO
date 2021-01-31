@@ -1,6 +1,8 @@
 library(shiny)
 library(tidyverse)
 dispo_alim <- read.csv("dispo_alim.csv", header=TRUE)
+pays_sous_nutrition <- read.csv("pays_sous_nutrition.csv", header=TRUE)
+sous_nutrition_pourcentage <- read.csv("sous_nutrition_pourcentage.csv", header=TRUE)
 # Define UI
 ui <- fluidPage(
   # Application title
@@ -31,8 +33,8 @@ ui <- fluidPage(
                   tabPanel("Top produits export",plotOutput("Top_produits_export")),
                   tabPanel("Top countries import",plotOutput("Top_countries_import")),
                   tabPanel("Top import by produits", plotOutput("Import_by_produits")),
-                  tabPanel("Text", textOutput("Text")),
-                  tabPanel("Table", tableOutput("Table"))
+                  tabPanel("Evolution population", plotOutput("Evolution_population")),
+                  tabPanel("Evolution sous nutrition", plotOutput("Evolution_sous_nutrition"))
       )
     )
   )
@@ -83,6 +85,16 @@ server <- shinyServer( function(input, output) {
   
     ggplot(main="Import_by_produits",data=import_by_produits, aes(y=reorder(item, import_quantity), x=import_quantity, fill = item)) +
     geom_bar(stat="identity") + xlab("Import Value") + ylab("Item")
+  })
+  
+  output$Evolution_population <- renderPlot({
+    ggplot(main="Evolution_population",data=sous_nutrition_pourcentage, aes(x=year, y=population_total)) +
+      geom_line(color="darkorange", size=0.5) + geom_point(size=1, alpha=0.5) + xlab("Year") + ylab("Population") + labs(title="Evolution de population mondial au cours des annee")
+  })
+  
+  output$Evolution_sous_nutrition <- renderPlot({
+    ggplot(main="Evolution sous nutrition",data=sous_nutrition_pourcentage, aes(x=year, y=total_pop_sous_nutrition)) +
+      geom_line(color="darkblue", size=0.5) + geom_point(size=1, alpha=0.5) + xlab("Year") + ylab("Population sous nutrition") + labs(title="Evolution de population mondial sous nutrition au cours des annee")
   })
 
 })
