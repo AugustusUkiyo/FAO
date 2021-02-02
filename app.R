@@ -34,7 +34,9 @@ ui <- fluidPage(
                   tabPanel("Top countries import",plotOutput("Top_countries_import")),
                   tabPanel("Top import by produits", plotOutput("Import_by_produits")),
                   tabPanel("Evolution population", plotOutput("Evolution_population")),
-                  tabPanel("Evolution sous nutrition", plotOutput("Evolution_sous_nutrition"))
+                  tabPanel("Evolution sous nutrition", plotOutput("Evolution_sous_nutrition")),
+                  tabPanel("Evolution sous nutrition avec population", plotOutput("Evolution_sous_nutrition_population")),
+                  tabPanel("Evolution production", plotOutput("Evolution_production"))
       )
     )
   )
@@ -89,12 +91,25 @@ server <- shinyServer( function(input, output) {
   
   output$Evolution_population <- renderPlot({
     ggplot(main="Evolution_population",data=sous_nutrition_pourcentage, aes(x=year, y=population_total)) +
-      geom_line(color="darkorange", size=0.5) + geom_point(size=1, alpha=0.5) + xlab("Year") + ylab("Population") + labs(title="Evolution de population mondial au cours des annee")
+      geom_line(color="darkorange", size=0.5) + geom_point(size=1, alpha=0.5) + xlab("Year") + ylab("Population") + labs(title="Evolution de population mondiale au cours des annee")
   })
   
   output$Evolution_sous_nutrition <- renderPlot({
     ggplot(main="Evolution sous nutrition",data=sous_nutrition_pourcentage, aes(x=year, y=total_pop_sous_nutrition)) +
-      geom_line(color="darkblue", size=0.5) + geom_point(size=1, alpha=0.5) + xlab("Year") + ylab("Population sous nutrition") + labs(title="Evolution de population mondial sous nutrition au cours des annee")
+      geom_line(color="darkblue", size=0.5) + geom_point(size=1, alpha=0.5) + xlab("Year") + ylab("Population sous nutrition") + labs(title="Evolution de population mondiale sous nutrition au cours des annee")
+  })
+  
+  output$Evolution_sous_nutrition_population <- renderPlot({
+    ggplot(main="Evolution sous nutrition avec population",data=sous_nutrition_pourcentage, aes(x=year)) +
+      geom_line(aes(y=total_pop_sous_nutrition), color="darkblue", size=0.5) + geom_point(aes(y=total_pop_sous_nutrition),size=2, alpha=0.5) + 
+      geom_line(aes(y=population_total), color="darkorange", size=0.5) + geom_point(aes(y=population_total),size=2, alpha=0.5) +
+      xlab("Year") + ylab("Population") + labs(title="Evolution de population mondiale et sous nutrition au cours des annee")
+  })
+  
+  output$Evolution_production <- renderPlot({
+    dbgg <- dispo_alim %>% select (year, origin, production) %>% group_by(year, origin) %>% summarise(total_production=sum(production,na.rm=TRUE))
+    ggplot(main="Evolution production", data=dbgg, aes(x=year, y=total_production, group=origin,fill=origin)) +
+      geom_bar(stat="identity") + labs(title="Evolution de production mondiale au cours des annee")
   })
 
 })
